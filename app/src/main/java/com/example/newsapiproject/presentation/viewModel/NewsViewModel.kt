@@ -8,11 +8,14 @@ import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import com.example.newsapiproject.data.model.APIResponse
 import com.example.newsapiproject.data.util.Resource
 import androidx.lifecycle.viewModelScope
 import com.example.newsapiproject.data.model.Article
+import com.example.newsapiproject.domain.usecase.DeleteSavedNewsUseCase
 import com.example.newsapiproject.domain.usecase.GetNewsHeadlinesUseCase
+import com.example.newsapiproject.domain.usecase.GetSavedNewsUseCase
 import com.example.newsapiproject.domain.usecase.GetSearchedNewsUseCase
 import com.example.newsapiproject.domain.usecase.SaveNewsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +28,9 @@ class NewsViewModel(
     private val app:Application,
     val getNewsHeadlinesUseCase: GetNewsHeadlinesUseCase,
     private val getSearchedNewsUseCase: GetSearchedNewsUseCase,
-    private val saveNewsUseCase: SaveNewsUseCase
+    private val saveNewsUseCase: SaveNewsUseCase,
+    private val getSavedNewsUseCase: GetSavedNewsUseCase,
+    private val deleteSavedNewsUseCase: DeleteSavedNewsUseCase
 ) : AndroidViewModel(app) {
     val newsHeadLines:MutableLiveData<Resource<APIResponse>> = MutableLiveData()
 
@@ -93,5 +98,13 @@ return false
     fun saveArticle(article: Article)=viewModelScope.launch {
         saveNewsUseCase.execute(article)
 
+    }
+    fun getSavedNews() = liveData {
+        getSavedNewsUseCase.execute().collect{
+            emit(it)
+        }
+    }
+    fun deleteArticle(article: Article)=viewModelScope.launch {
+        deleteSavedNewsUseCase.execute(article)
     }
 }
