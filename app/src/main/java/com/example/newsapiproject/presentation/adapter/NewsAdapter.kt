@@ -33,12 +33,10 @@ class NewsAdapter:RecyclerView.Adapter<NewsAdapter.NewsViewHolder>(){
     }
 
     override fun getItemCount(): Int {
-        Log.d(TAG, "getItemCount: item count ${differ.currentList.size}")
        return differ.currentList.size
     }
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
-        Log.d(TAG, "onBindViewHolder: start $position")
        val article = differ.currentList[position]
         holder.bind(article)
     }
@@ -52,12 +50,16 @@ class NewsAdapter:RecyclerView.Adapter<NewsAdapter.NewsViewHolder>(){
                 binding.tvTitle.text = article.title
                 binding.tvDescription.text = article.description
                 binding.tvPublishedAt.text = article.publishedAt
-                binding.tvSource.text = article.source.name
+                binding.tvSource.text = article.source?.name
 
                 Glide.with(binding.ivArticleImage.context)
                     .load(article.urlToImage)
                     .into(binding.ivArticleImage)
-                Log.d("xvxcvxcv",article.title)
+                binding.root.setOnClickListener {
+                   onItemClickListener?.let {
+                       it(article)
+                   }
+                }
             }catch (e: Exception){
                 Log.d(TAG, "bind: error: ${e.message}")
             }
@@ -65,4 +67,11 @@ class NewsAdapter:RecyclerView.Adapter<NewsAdapter.NewsViewHolder>(){
         }
 
     }
+
+    private var onItemClickListener:((Article)->Unit)?=null
+
+    fun setOnItemClickListener(listener : (Article)->Unit){
+        onItemClickListener=listener
+    }
+
 }

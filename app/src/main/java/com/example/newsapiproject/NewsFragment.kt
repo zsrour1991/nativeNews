@@ -7,13 +7,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
+import android.widget.SearchView
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.newsapiproject.data.util.Resource
 import com.example.newsapiproject.databinding.FragmentNewsBinding
 import com.example.newsapiproject.presentation.adapter.NewsAdapter
 import com.example.newsapiproject.presentation.viewModel.NewsViewModel
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.log
 
 private const val TAG = "NewsFragment"
@@ -41,9 +46,18 @@ class NewsFragment : Fragment() {
         fragmentNewsBinding = FragmentNewsBinding.bind(view)
         viewModel = (activity as MainActivity).viewModel
         newsAdapter = (activity as MainActivity).newsAdapter
-
+        newsAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply {
+                putSerializable("selected_article",it)
+            }
+            findNavController().navigate(
+                R.id.action_newsFragment_to_infoFragment,
+                bundle
+            )
+        }
         initRecyclerView()
         viewNewsList()
+       // setSearchedNews()
     }
 
     private fun viewNewsList() {
@@ -59,7 +73,7 @@ class NewsFragment : Fragment() {
                     response.data?.let {
                         newsAdapter.differ.submitList(it.articles.toList())
                         if(it.totalResults%20 == 0)
-                         pages= it.totalResults/20
+                            pages= it.totalResults/20
                         else
                             pages=it.totalResults/20+1
 
@@ -86,7 +100,7 @@ class NewsFragment : Fragment() {
     }
 
     private fun initRecyclerView() {
-     //   newsAdapter = NewsAdapter()
+        //   newsAdapter = NewsAdapter()
         fragmentNewsBinding.rvNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
@@ -132,5 +146,73 @@ class NewsFragment : Fragment() {
 
     }
 
+    fun setSearchedNews(){
+        Log.d(TAG, "onQueryTextSubmit: response")
+        fragmentNewsBinding.svNews.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
 
-}
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+
+                viewModel.searchNews("us",p0.toString(),page)
+                viewSearchedNews()
+                return false
+            }
+
+            override fun onQueryTextChange(p0: String?): Boolean {
+
+                MainScope().launch {
+                    delay(2000)
+                    viewModel.searchNews("us",p0.toString(),page)
+                    viewSearchedNews()
+                }
+//                viewModel.searchNews("us",p0.toString(),page)
+//                viewSearchedNews()
+                return false
+            }
+
+        })
+        fragmentNewsBinding.svNews.setOnCloseListener(object :SearchView.OnCloseListener{
+            override fun onClose(): Boolean {
+                initRecyclerView()
+                viewNewsList()
+                return false
+            }
+
+        })
+
+    }
+    fun viewSearchedNews() {
+        viewModel.searchedNews.observe(viewLifecycleOwner) { response ->
+
+            Log.d(TAG, "viewNewsList: response: $response")
+            when (response) {
+                is Resource.Success -> {
+                    hideProgressBar()
+
+                    response.data?.let {
+                        newsAdapter.differ.submitList(it.articles.toList())
+                        if (it.totalResults % 20 == 0)
+                            pages = it.totalResults / 20
+                        else
+                            pages = it.totalResults / 20 + 1
+
+                        isLastPage = page == pages
+
+                    }
+
+                }
+
+                is Resource.Error -> {
+                    hideProgressBar()
+                    response.message?.let {
+                        Toast.makeText(activity, "An error occured: $it", Toast.LENGTH_LONG).show()
+                    }
+
+                }
+
+                is Resource.Loading -> {
+                    showProgressBar()
+                }
+            }
+
+        }
+    }}
