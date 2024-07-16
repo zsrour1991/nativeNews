@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.webkit.WebViewClient
 import androidx.navigation.fragment.navArgs
 import com.example.newsapiproject.databinding.FragmentInfoBinding
-import com.example.newsapiproject.presentation.adapter.NewsAdapter
 import com.example.newsapiproject.presentation.viewModel.NewsViewModel
 import com.google.android.material.snackbar.Snackbar
 
@@ -28,6 +27,7 @@ class InfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fragmentInfoBinding=FragmentInfoBinding.bind(view)
+        
         val args: InfoFragmentArgs by navArgs()
         val article =args.selectedArticle
 
