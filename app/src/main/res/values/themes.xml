@@ -5,5 +5,8 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.NewsApiProject" parent="Base.Theme.NewsApiProject" />
+    <style name="Theme.NewsApiProject" parent="Base.Theme.NewsApiProject" >
+
+        <item name="colorSecondary">@color/search_background</item>
+    </style>
 </resources>

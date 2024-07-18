@@ -10,7 +10,7 @@ import java.util.concurrent.*
 interface NewsRepository {
 
     suspend fun getNewsHeadLines(country:String, page:Int): Resource<APIResponse>
-    suspend fun getSearchedNewsHeadLines(searchQuery:String): Resource<APIResponse>
+    suspend fun getSearchedNewsHeadLines(country:String,searchQuery:String,page: Int): Resource<APIResponse>
     suspend fun saveNews(article: Article)
     suspend fun deleteNews(article: Article)
     fun getSavedNews():Flow<List<Article>>
